@@ -29,8 +29,8 @@ inputs:
     description: "Deprecated. Use `manifest_path` instead."
     required: false
   version:
-    description: "Release-plz version to use. (Default: `0.3.158`)."
-    default: "0.3.158"
+    description: "Release-plz version to use. (Default: `0.3.159`)."
+    default: "0.3.159"
     required: false
   token:
     description: "Token used to publish to the cargo registry"
@@ -87,10 +87,9 @@ runs:
       shell: bash
       run: |
         cargo-binstall \
-            release@${{ inputs.version }}\
-            --git https://github.com/puniyu/release\
-            --force\
-            --strategies=crate-meta-data,compile\
+            release@${{ inputs.version }} \
+            --git "https://github.com/puniyu/release" \
+            --force \
             --no-confirm
     - name: Configure git user from GitHub token
       uses: release-plz/git-config@59144859caf016f8b817a2ac9b051578729173c4
@@ -164,9 +163,9 @@ runs:
 
         if [[ -z "${{ inputs.command }}" || "${{ inputs.command }}" == "release-pr" ]]
         then
-            echo "-- Running release-plz release-pr --"
+            echo "-- Running release release-pr --"
             release_pr_stderr=$(mktemp)
-            if ! release_pr_output=$(release-plz release-pr\
+            if ! release_pr_output=$(release release-pr\
                 --git-token "${GITHUB_TOKEN}"\
                 --repo-url "https://github.com/${GITHUB_REPOSITORY}"\
                 "${CONFIG_PATH[@]}"\
@@ -180,7 +179,7 @@ runs:
                 # GitHub can return 422 for no-op/unprocessable release-pr calls.
                 # Treat this as "nothing to create" instead of failing the whole action.
                 if [[ "$release_pr_error" == *"422"* ]]; then
-                    echo "::warning::release-plz release-pr failed with HTTP 422; continuing with no PRs created."
+                    echo "::warning::release release-pr failed with HTTP 422; continuing with no PRs created."
                     release_pr_output='{"prs":[]}'
                 else
                     echo "$release_pr_error" >&2
@@ -206,8 +205,8 @@ runs:
 
         if [[ -z "${{ inputs.command }}" || "${{ inputs.command }}" == "release" ]]
         then
-            echo "-- Running release-plz release --"
-            release_output=$(release-plz release\
+            echo "-- Running release release --"
+            release_output=$(release release\
                 --git-token "${GITHUB_TOKEN}"\
                 "${CONFIG_PATH[@]}"\
                 "${ALT_REGISTRY[@]}"\
